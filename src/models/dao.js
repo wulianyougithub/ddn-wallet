@@ -4,7 +4,9 @@ import {
   getDaos,
   getMyOrgs,
   createOrUpdateOrg,
-  getAobTransaction,
+  putDaoExchange,
+  getConfirmExchange,
+  putContra,
 } from '@/services/api';
 
 const initialState = {
@@ -14,6 +16,10 @@ const initialState = {
     count: 0,
   },
   myOrgs: {
+    list: [],
+    count: 0,
+  },
+  myConfirmList: {
     list: [],
     count: 0,
   },
@@ -38,7 +44,6 @@ export default {
     },
     *getMyOrg({ payload }, { call, put }) {
       const response = yield call(getMyOrgs, payload);
-      console.log('myorgs', response, payload);
       yield put({
         type: 'saveMyOrgs',
         payload: response.result,
@@ -46,7 +51,6 @@ export default {
     },
     *getDaoList({ payload }, { call, put }) {
       const response = yield call(getDaos, payload.address);
-      console.log('getAobList response', response);
 
       if (response.success) {
         yield put({
@@ -55,17 +59,32 @@ export default {
         });
       }
     },
-    *getAobTransfers({ payload }, { call, put }) {
-      const response = yield call(getAobTransaction, payload);
-      console.log('getAobTransfers payload', payload);
+    *putExchange({ payload, callback }, { call }) {
+      const response = yield call(putDaoExchange, payload);
+      callback(response);
+      // console.log('getAobTransfers payload', payload);
 
-      yield put({
-        type: 'saveAoBTransfers',
-        payload: response,
-      });
+      // yield put({
+      //   type: 'saveAoBTransfers',
+      //   payload: response,
+      // });
+    },
+    *getNeedConfirmExchange({ payload }, { call, put }) {
+      const response = yield call(getConfirmExchange, payload);
+
+      if (response.success) {
+        yield put({
+          type: 'saveMyConfirmList',
+          payload: response.result,
+        });
+      }
     },
     *putOrg({ payload, callback }, { call }) {
       const res = yield call(createOrUpdateOrg, payload);
+      callback(res);
+    },
+    *putContributions({ payload, callback }, { call }) {
+      const res = yield call(putContra, payload);
       callback(res);
     },
   },
@@ -89,7 +108,6 @@ export default {
       };
     },
     saveAoBTransfers(state, { payload }) {
-      console.log('trans payload', payload);
       return {
         ...state,
         transactions: payload.result.rows,
@@ -101,6 +119,17 @@ export default {
       return {
         ...state,
         dao: {
+          list: payload.rows,
+          count: payload.total,
+        },
+      };
+    },
+    saveMyConfirmList(state, { payload }) {
+      // console.log('payload', payload);
+
+      return {
+        ...state,
+        myConfirmList: {
           list: payload.rows,
           count: payload.total,
         },

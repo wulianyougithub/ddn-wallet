@@ -146,16 +146,13 @@ export async function getAobBalance(params) {
 }
 
 // 获取指定账户指定资产转账记录
-export async function getAobTransaction(params) {
-  console.log(
-    `/api/aob/transfers/my/${params.address}/${params.currency}?limit=${params.limit ||
-      10}&offset=${params.offset || 0}`
-  );
-
-  return request(
-    `/api/aob/transfers/my/${params.address}/${params.currency}?limit=${params.limit ||
-      10}&offset=${params.offset || 0}`
-  );
+export async function putDaoExchange(params) {
+  return request(`/api/dao/exchanges`, {
+    method: 'PUT',
+    body: {
+      ...params,
+    },
+  });
 }
 
 // ----------------------------------dao--------------------------------------//
@@ -173,9 +170,26 @@ export async function createOrUpdateOrg(params) {
     },
   });
 }
+export async function putContra(params) {
+  return request(`/api/dao/contributions/${params.org_id}`, {
+    method: 'PUT',
+    // headers: {
+    //   Accept: 'application/json',
+    //   'Content-Type': 'application/json',
+    //   nethash: DdnJS.constants.nethash,
+    //   version: '',
+    // },
+    body: {
+      ...params,
+    },
+  });
+}
 export async function getDaos() {
   return request(`/api/dao/orgs`);
 }
 export async function getMyOrgs(params) {
   return request(`/api/dao/orgs?address=${params.address}`);
+}
+export async function getConfirmExchange(params) {
+  return request(`/api/dao/exchanges/received_address/${params.address}/all`);
 }

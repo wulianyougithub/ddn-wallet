@@ -48,11 +48,9 @@ class RegisteredOrg extends PureComponent {
       // }
       // const maximum = parseInt(values.maximum * multi, 10).toString();
       const keystore = getKeyStore();
-      console.log(keystore);
       const { phaseKey } = keystore;
       values.secret = phaseKey;
       values.state = 0;
-      console.log(values);
       // const transaction = await DdnJS.aob.createAsset(
       //   name,
       //   values.des,
@@ -90,10 +88,9 @@ class RegisteredOrg extends PureComponent {
   };
 
   render() {
-    const { loading, form } = this.props;
+    const { form } = this.props;
     const { getFieldDecorator } = form;
     const { visible, errorMessage } = this.state;
-    console.log('loading', loading);
     return (
       <div>
         <Button type="primary" onClick={this.showModal}>

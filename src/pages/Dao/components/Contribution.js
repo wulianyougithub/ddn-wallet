@@ -39,19 +39,18 @@ class IssueAssets extends PureComponent {
       const exchange = {
         org_id: asset.org_id,
         price: amount,
-        state: 1,
-        receivedAddress: values.received_address,
+        url: values.url,
+        title: values.title,
         secret: phaseKey,
       };
-      // console.log('transaction', transaction);
       dispatch({
-        type: 'dao/putExchange',
+        type: 'dao/putContributions',
         payload: exchange,
         callback: response => {
           // console.log('response', response);
           if (response.success) {
             this.setState({ visible: false });
-            message.success('发行成功');
+            message.success('贡献成功');
           } else {
             this.setState({ errorMessage: response.error });
           }
@@ -61,32 +60,34 @@ class IssueAssets extends PureComponent {
   };
 
   render() {
-    const { asset, form } = this.props;
+    const { form } = this.props;
     const { getFieldDecorator } = form;
     const { visible, errorMessage } = this.state;
     return (
       <div>
         <Button type="primary" onClick={this.showModal}>
-          {formatMessage({ id: 'app.dao.dao-change' })}
+          {formatMessage({ id: 'app.dao.contribution-button' })}
         </Button>
         <Modal
-          title={formatMessage({ id: 'app.dao.dao-change' })}
+          title={formatMessage({ id: 'app.dao.contribution' })}
           visible={visible}
           onCancel={this.handleCancel}
           onOk={this.handleCreate}
           destroyOnClose
         >
           <Form layout="vertical">
-            <FormItem label={formatMessage({ id: 'app.dao.dao-title' })}>
-              <div>{asset.currency || asset.name}</div>
+            <FormItem label={formatMessage({ id: 'app.dao.contribution-title' })}>
+              {getFieldDecorator('title', {
+                rules: [{ required: true, message: 'Please input the contribution title!' }],
+              })(<Input />)}
             </FormItem>
-            <FormItem label={formatMessage({ id: 'app.dao.dao-price' })}>
+            <FormItem label={formatMessage({ id: 'app.dao.contribution-price' })}>
               {getFieldDecorator('price', {
                 rules: [{ required: true, message: 'Please input the dao amount price!' }],
               })(<Input type="number" />)}
             </FormItem>
-            <FormItem label={formatMessage({ id: 'app.dao.dao-reciveAddress' })}>
-              {getFieldDecorator('received_address', {
+            <FormItem label={formatMessage({ id: 'app.dao.contribution-url' })}>
+              {getFieldDecorator('url', {
                 rules: [{ required: true, message: 'Please input the dao received address!' }],
               })(<Input />)}
             </FormItem>
