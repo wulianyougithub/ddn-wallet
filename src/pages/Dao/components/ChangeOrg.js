@@ -39,7 +39,7 @@ class IssueAssets extends PureComponent {
       const exchange = {
         org_id: asset.org_id,
         price: amount,
-        state: 1,
+        state: 0,
         receivedAddress: values.received_address,
         secret: phaseKey,
       };

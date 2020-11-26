@@ -1,6 +1,6 @@
 import {
   getIssuerByAddress,
-  // getAobList,
+  fetchDaoDetail,
   getDaos,
   getMyOrgs,
   createOrUpdateOrg,
@@ -24,6 +24,7 @@ const initialState = {
     count: 0,
   },
   transactions: [],
+  detail: {},
 };
 
 export default {
@@ -79,6 +80,15 @@ export default {
         });
       }
     },
+    *getDaoDetail({ payload }, { call, put }) {
+      const response = yield call(fetchDaoDetail, payload);
+      if (response.success) {
+        yield put({
+          type: 'detail',
+          payload: response.result.org,
+        });
+      }
+    },
     *putOrg({ payload, callback }, { call }) {
       const res = yield call(createOrUpdateOrg, payload);
       callback(res);
@@ -122,6 +132,14 @@ export default {
           list: payload.rows,
           count: payload.total,
         },
+      };
+    },
+    detail(state, { payload }) {
+      // console.log('payload', payload);
+
+      return {
+        ...state,
+        detail: payload,
       };
     },
     saveMyConfirmList(state, { payload }) {

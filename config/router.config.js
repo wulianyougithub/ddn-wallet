@@ -102,6 +102,13 @@ export default [
         icon: 'bank',
         component: './Dao/Dao',
       },
+      {
+        path: '/dao/detail',
+        name: 'daoDetail',
+        icon: 'bank',
+        hideInMenu: true,
+        component: './Dao/DaoDetail',
+      },
       // Decentrelize application
       {
         path: '/dapp',

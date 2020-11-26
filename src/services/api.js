@@ -187,6 +187,9 @@ export async function putContra(params) {
 export async function getDaos() {
   return request(`/api/dao/orgs`);
 }
+export async function fetchDaoDetail(params) {
+  return request(`/api/dao/orgs/${params.org_id}`);
+}
 export async function getMyOrgs(params) {
   return request(`/api/dao/orgs?address=${params.address}`);
 }

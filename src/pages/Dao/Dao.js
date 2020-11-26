@@ -1,7 +1,8 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Button, Card, Icon, Table, Modal, message } from 'antd';
+import { Button, Card, Icon, Table, Modal, message, Tabs, Divider } from 'antd';
 import { formatMessage } from 'umi/locale';
+import router from 'umi/router';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import { getKeyStore } from '@/utils/authority';
 import RegisteredOrg from './components/RegisteredOrg';
@@ -11,6 +12,7 @@ import ChangeOrg from './components/ChangeOrg';
 // import TransferAssets from './components/TransferAssets';
 // import AOBTransaction from './components/AOBTransaction';
 const { confirm } = Modal;
+const { TabPane } = Tabs;
 class Dao extends PureComponent {
   constructor(props) {
     super(props);
@@ -93,8 +95,16 @@ class Dao extends PureComponent {
         key: 'action',
         width: '30%',
         render: record => (
-          <div>
+          <div style={{ display: 'flex' }}>
             <Contribution asset={record} />
+            <Divider type="vertical" />
+            <Button
+              onClick={() => {
+                router.push({ pathname: '/dao/detail', query: record });
+              }}
+            >
+              详情
+            </Button>
           </div>
         ),
       },
@@ -111,6 +121,13 @@ class Dao extends PureComponent {
         dataIndex: 'sender_address',
         key: 'sender_address',
         width: '10%',
+      },
+      {
+        title: '价格',
+        dataIndex: 'price',
+        key: 'price',
+        width: '10%',
+        render: item => item / (1 * 100000000),
       },
       {
         title: '接收者地址',
@@ -141,7 +158,9 @@ class Dao extends PureComponent {
               </Button>
             ) : (
               <Button type="primary" danger disabled>
-                {formatMessage({ id: 'app.dao.dao-buyed' })}
+                {!(this.keyStore.address === record.received_address && record.state === 1)
+                  ? formatMessage({ id: 'app.dao.dao-buyed' })
+                  : '已出售'}
               </Button>
             )}
           </div>
@@ -197,7 +216,7 @@ class Dao extends PureComponent {
       senderAddress: item.received_address,
       receivedAddress: item.sender_address,
       recipientId: item.sender_address,
-      exchange_trs_id: item.exchange_trs_id,
+      exchangeTrsId: item.transaction_id,
       secret: phaseKey,
     };
     dispatch({
@@ -206,9 +225,9 @@ class Dao extends PureComponent {
       callback: response => {
         // console.log('response', response);
         if (response.success) {
-          message.success('成功');
+          message.success('交易成功');
         } else {
-          message.error('失败');
+          message.error(response.error);
         }
       },
     });
@@ -235,62 +254,84 @@ class Dao extends PureComponent {
         </div>
       </div>
     );
+    // const tabList = [
+    //   {
+    //     key: 'delegate-list',
+    //     tab: '组织号列表',
+    //   },
+    //   {
+    //     key: 'votelist',
+    //     tab: '我的组织号',
+    //   },
+    //   {
+    //     key: 'forging',
+    //     tab: '交易记录',
+    //   },
+    // ];
     return (
       <PageHeaderWrapper title={pageTitle}>
-        <Card
-          bordered={false}
-          title={formatMessage({ id: 'app.dao.list' })}
-          extra={<RegisteredOrg />}
-        >
-          <Table
-            loading={loading}
-            rowKey={record => record.transaction_id}
-            dataSource={dao.list}
-            columns={this.allColums}
-            pagination={dao.count < 10 && false}
-            expandedRowRender={record => (
-              <p style={{ margin: 0 }}>
-                {formatMessage({ id: 'app.dao.dao-trsId' })}: {record.transaction_id}
-              </p>
-            )}
-          />
-        </Card>
-        <Card
-          bordered={false}
-          style={{ marginTop: 30 }}
-          title={formatMessage({ id: 'app.dao.dao-my-org' })}
-        >
-          <Table
-            loading={loading}
-            rowKey={record => record.transaction_id}
-            dataSource={myOrgs.list}
-            columns={this.columns}
-            pagination={myOrgs.count < 10 && false}
-            expandedRowRender={record => (
-              <p style={{ margin: 0 }}>
-                {formatMessage({ id: 'app.dao.dao-trsId' })}: {record.transaction_id}
-              </p>
-            )}
-          />
-        </Card>
-        <Card
-          bordered={false}
-          style={{ marginTop: 30 }}
-          title={formatMessage({ id: 'app.dao.dao-whit-buy' })}
-        >
-          <Table
-            loading={loading}
-            rowKey={record => record.transaction_id}
-            dataSource={myConfirmList.list}
-            columns={this.confirmColums}
-            pagination={myConfirmList.count < 10 && false}
-            expandedRowRender={record => (
-              <p style={{ margin: 0 }}>
-                {formatMessage({ id: 'app.dao.dao-trsId' })}: {record.transaction_id}
-              </p>
-            )}
-          />
-        </Card>
+        <Tabs tabBarStyle={{ backgroundColor: 'white' }} defaultActiveKey="1">
+          <TabPane tab={formatMessage({ id: 'app.dao.list' })} key="1">
+            <Card
+              bordered={false}
+              // title={formatMessage({ id: 'app.dao.list' })}
+              extra={<RegisteredOrg />}
+            >
+              <Table
+                loading={loading}
+                rowKey={record => record.transaction_id}
+                dataSource={dao.list}
+                columns={this.allColums}
+                pagination={dao.count < 10 && false}
+                expandedRowRender={record => (
+                  <p style={{ margin: 0 }}>
+                    {formatMessage({ id: 'app.dao.dao-trsId' })}: {record.transaction_id}
+                  </p>
+                )}
+              />
+            </Card>
+          </TabPane>
+          <TabPane tab={formatMessage({ id: 'app.dao.dao-my-org' })} key="2">
+            <Card
+              bordered={false}
+              style={{ marginTop: 30 }}
+              // title={formatMessage({ id: 'app.dao.dao-my-org' })}
+            >
+              <Table
+                loading={loading}
+                rowKey={record => record.transaction_id}
+                dataSource={myOrgs.list}
+                columns={this.columns}
+                pagination={myOrgs.count < 10 && false}
+                expandedRowRender={record => (
+                  <p style={{ margin: 0 }}>
+                    {formatMessage({ id: 'app.dao.dao-trsId' })}: {record.transaction_id}
+                  </p>
+                )}
+              />
+            </Card>
+          </TabPane>
+          <TabPane tab={formatMessage({ id: 'app.dao.dao-whit-buy' })} key="3">
+            <Card
+              bordered={false}
+              style={{ marginTop: 30 }}
+              // title={formatMessage({ id: 'app.dao.dao-whit-buy' })}
+            >
+              <Table
+                loading={loading}
+                rowKey={record => record.transaction_id}
+                dataSource={myConfirmList.list}
+                columns={this.confirmColums}
+                pagination={myConfirmList.count < 10 && false}
+                expandedRowRender={record => (
+                  <p style={{ margin: 0 }}>
+                    {formatMessage({ id: 'app.dao.dao-trsId' })}: {record.transaction_id}
+                  </p>
+                )}
+              />
+            </Card>
+          </TabPane>
+        </Tabs>
       </PageHeaderWrapper>
     );
   }
